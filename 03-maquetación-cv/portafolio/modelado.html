@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portafolio - Modelados 3D</title>
+
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml, 
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'> 
+<text y='.9em' font-size='90'>🦖</text> </svg>">
+    
+    <!-- ✅ ANTI-CACHÉ -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ✅ Fondo corregido */
+        body {
+            background-image: url("../img/fondo-secciones.png");
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center top;
+            background-attachment: scroll;
+            background-color: #000;
+            min-height: 100vh;
+            width: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* ========== LADO IZQUIERDO: BOTONES + VIDEO ========== */
+        .lado-izquierdo {
+            position: fixed;
+            left: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            z-index: 1000;
+        }
+
+        /* ========== BOTONES EN COLUMNA ========== */
+        .botones-columna {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .boton-movible {
+            width: 200px;
+            padding: 14px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 40px;
+            cursor: grab;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .boton-movible:active {
+            cursor: grabbing;
+        }
+
+        .boton-movible:hover {
+            transform: translateX(5px) scale(1.05);
+        }
+
+        .boton-movible:focus {
+            outline: 3px solid #FFD700;
+            outline-offset: 3px;
+        }
+
+        .btn-inicio {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            color: white;
+            border: 1px solid rgba(76, 175, 80, 0.5);
+        }
+
+        .btn-inicio:hover {
+            background: linear-gradient(135deg, #45a049, #1B5E20);
+        }
+
+        .btn-regreso {
+            background: linear-gradient(135deg, #ff9800, #E65100);
+            color: white;
+            border: 1px solid rgba(255, 152, 0, 0.5);
+        }
+
+        .btn-regreso:hover {
+            background: linear-gradient(135deg, #e68900, #BF360C);
+        }
+
+        .btn-siguiente {
+            background: linear-gradient(135deg, #2196F3, #0D47A1);
+            color: white;
+            border: 1px solid rgba(33, 150, 243, 0.5);
+        }
+
+        .btn-siguiente:hover {
+            background: linear-gradient(135deg, #0b7dda, #1565C0);
+        }
+
+        /* Handles para redimensionar y rotar */
+        .resize-handle {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #ff4d6d;
+            border-radius: 50%;
+            bottom: -8px;
+            right: -8px;
+            cursor: nwse-resize;
+            z-index: 1001;
+            border: 2px solid white;
+            box-shadow: 0 0 4px rgba(0,0,0,0.5);
+        }
+
+        .rotate-handle {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #4d9eff;
+            border-radius: 50%;
+            top: -8px;
+            left: -8px;
+            cursor: grab;
+            z-index: 1001;
+            border: 2px solid white;
+            box-shadow: 0 0 4px rgba(0,0,0,0.5);
+        }
+
+        .rotate-handle:active {
+            cursor: grabbing;
+        }
+
+        .boton-movible.selected {
+            outline: 3px solid #FFD700;
+            outline-offset: 4px;
+        }
+
+        /* ========== VIDEO DEBAJO DE LOS BOTONES ========== */
+        .video-container {
+            width: 400px;
+            max-width: 35vw;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 2px solid rgba(255, 215, 0, 0.4);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        .video-titulo {
+            text-align: center;
+            color: #FFD700;
+            font-size: 20px;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16/9;
+            border: none;
+            border-radius: 12px;
+        }
+
+        /* ========== CARRUSEL VERTICAL MÁS GRANDE ========== */
+        .carrusel-vertical-container {
+            position: fixed;
+            right: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 450px;
+            height: 550px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 20px;
+            border: 2px solid rgba(255, 215, 0, 0.4);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+            overflow-x: hidden;
+            scroll-snap-type: y mandatory;
+            z-index: 999;
+        }
+
+        .carrusel-vertical-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .carrusel-vertical-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .carrusel-vertical-container::-webkit-scrollbar-thumb {
+            background: #FFD700;
+            border-radius: 10px;
+        }
+
+        .carrusel-titulo {
+            text-align: center;
+            color: #FFD700;
+            font-size: 24px;
+            margin-bottom: 20px;
+            letter-spacing: 3px;
+            font-weight: bold;
+        }
+
+        .carrusel-vertical-track {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .carrusel-item-vertical {
+            scroll-snap-align: start;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .carrusel-item-vertical:hover {
+            transform: scale(1.02);
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .carrusel-item-vertical img {
+            width: auto;
+            max-width: 100%;
+            max-height: 280px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .carrusel-item-vertical img:hover {
+            transform: scale(1.02);
+        }
+
+        /* Tooltip de ayuda */
+        .help-tooltip {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-family: monospace;
+            z-index: 10000;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            pointer-events: none;
+        }
+
+        .help-tooltip kbd {
+            background: #333;
+            border-radius: 5px;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: bold;
+            margin: 0 3px;
+            border: 1px solid #FFD700;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 1400px) {
+            .carrusel-vertical-container {
+                width: 380px;
+                height: 500px;
+            }
+            .carrusel-item-vertical img {
+                max-height: 240px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .lado-izquierdo {
+                left: 3%;
+            }
+            .boton-movible {
+                width: 170px;
+                padding: 12px 18px;
+                font-size: 14px;
+            }
+            .video-container {
+                width: 320px;
+            }
+            .carrusel-vertical-container {
+                right: 3%;
+                width: 320px;
+                height: 450px;
+            }
+            .carrusel-item-vertical img {
+                max-height: 200px;
+            }
+            .carrusel-titulo {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 1000px) {
+            .lado-izquierdo {
+                left: 2%;
+            }
+            .boton-movible {
+                width: 150px;
+                padding: 10px 15px;
+                font-size: 13px;
+            }
+            .video-container {
+                width: 280px;
+            }
+            .video-titulo {
+                font-size: 16px;
+            }
+            .carrusel-vertical-container {
+                right: 2%;
+                width: 280px;
+                height: 400px;
+            }
+            .carrusel-titulo {
+                font-size: 18px;
+            }
+            .carrusel-item-vertical img {
+                max-height: 170px;
+            }
+        }
+
+        @media (max-width: 800px) {
+            body {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            .lado-izquierdo {
+                position: relative;
+                left: auto;
+                top: auto;
+                transform: none;
+                margin-top: 30px;
+                margin-bottom: 20px;
+            }
+            .botones-columna {
+                flex-direction: row;
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .boton-movible {
+                width: auto;
+                min-width: 120px;
+                padding: 10px 18px;
+                font-size: 13px;
+            }
+            .video-container {
+                width: 350px;
+                max-width: 85vw;
+            }
+            .carrusel-vertical-container {
+                position: relative;
+                right: auto;
+                top: auto;
+                transform: none;
+                width: 380px;
+                height: 400px;
+                margin: 0 auto 30px;
+            }
+            .help-tooltip {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .boton-movible {
+                min-width: 100px;
+                padding: 8px 12px;
+                font-size: 11px;
+            }
+            .video-container {
+                width: 300px;
+            }
+            .video-titulo {
+                font-size: 14px;
+            }
+            .carrusel-vertical-container {
+                width: 320px;
+                height: 350px;
+            }
+            .carrusel-titulo {
+                font-size: 16px;
+            }
+            .carrusel-item-vertical img {
+                max-height: 150px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .video-container {
+                width: 260px;
+            }
+            .carrusel-vertical-container {
+                width: 280px;
+                height: 300px;
+            }
+            .carrusel-item-vertical img {
+                max-height: 130px;
+            }
+            .carrusel-titulo {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== LADO IZQUIERDO: BOTONES + VIDEO ========== -->
+    <div class="lado-izquierdo">
+        
+        <!-- BOTONES EN COLUMNA -->
+        <div class="botones-columna">
+            <a href="../index.html" class="boton-movible btn-inicio" id="btnInicio" tabindex="0">
+                🏠 INICIO
+            </a>
+
+            <button class="boton-movible btn-regreso" id="btnRegreso" tabindex="0">
+                ◀ REGRESO
+            </button>
+
+            <button class="boton-movible btn-siguiente" id="btnSiguiente" tabindex="0">
+                SIGUIENTE ▶
+            </button>
+        </div>
+
+        <!-- VIDEO DEBAJO DE LOS BOTONES -->
+        <div class="video-container">
+            <div class="video-titulo">
+                🎬 MODELADOS 3D
+            </div>
+            <iframe 
+                src="https://www.canva.com/design/DAHBHf_eAPw/8muR5EXWnOXgJ9YuueN--w/watch?embed"
+                allowfullscreen
+                allow="fullscreen"
+                title="Video de presentación - Modelados 3D">
+            </iframe>
+        </div>
+    </div>
+
+    <!-- ========== CARRUSEL VERTICAL MÁS GRANDE (LADO DERECHO) ========== -->
+    <div class="carrusel-vertical-container">
+        <div class="carrusel-titulo">
+            ✨ MODELADOS 3D ✨
+        </div>
+        <div class="carrusel-vertical-track" id="carruselTrack">
+            <!-- Elemento 1 -->
+            <div class="carrusel-item-vertical">
+                <img src="../img/sofa.png" alt="Modelado Sofá" onerror="this.src='https://via.placeholder.com/400x300?text=Sofá+3D'">
+            </div>
+            <!-- Elemento 2 -->
+            <div class="carrusel-item-vertical">
+                <img src="../img/proyector.png" alt="Modelado Proyector" onerror="this.src='https://via.placeholder.com/400x300?text=Proyector+3D'">
+            </div>
+            <!-- Elemento 3 -->
+            <div class="carrusel-item-vertical">
+                <img src="../img/extintor.png" alt="Modelado Extintor" onerror="this.src='https://via.placeholder.com/400x300?text=Extintor+3D'">
+            </div>
+            <!-- Elemento 4 -->
+            <div class="carrusel-item-vertical">
+                <img src="../img/bote.png" alt="Modelado Bote" onerror="this.src='https://via.placeholder.com/400x300?text=Bote+3D'">
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ Tooltip de ayuda -->
+    <div class="help-tooltip">
+        💡 <kbd>🖱️ Arrastrar</kbd> mover · 
+        <kbd>Ctrl</kbd>+<kbd>arrastrar</kbd> rotar · 
+        <kbd>🐭 Rueda</kbd> tamaño · 
+        <kbd>+</kbd>/<kbd>-</kbd> escalar
+    </div>
+
+    <script>
+        let selected = null;
+        let isDragging = false;
+        let isResizing = false;
+        let isRotating = false;
+        let startX, startY, startLeft, startTop, startWidth;
+        let startAngle = 0;
+        let currentAngle = 0;
+        let dragStarted = false;
+
+        // ========== GUARDAR POSICIONES ==========
+        function savePositions() {
+            const data = [];
+            document.querySelectorAll('.boton-movible').forEach(el => {
+                data.push({
+                    top: el.style.top,
+                    left: el.style.left,
+                    transform: el.style.transform
+                });
+            });
+            localStorage.setItem("layoutModelados", JSON.stringify(data));
+            console.log("💾 Posiciones guardadas");
+        }
+
+        // ========== CARGAR POSICIONES ==========
+        function loadPositions() {
+            const data = JSON.parse(localStorage.getItem("layoutModelados"));
+            if (!data) return;
+
+            document.querySelectorAll('.boton-movible').forEach((el, i) => {
+                if (data[i]) {
+                    el.style.top = data[i].top;
+                    el.style.left = data[i].left;
+                    if (data[i].transform) el.style.transform = data[i].transform;
+                }
+            });
+            console.log("📂 Posiciones cargadas");
+        }
+
+        // ========== CREAR MANIJAS ==========
+        function createHandles(el) {
+            const oldResize = el.querySelector('.resize-handle');
+            const oldRotate = el.querySelector('.rotate-handle');
+            if (oldResize) oldResize.remove();
+            if (oldRotate) oldRotate.remove();
+
+            const resizeHandle = document.createElement("div");
+            resizeHandle.className = "resize-handle";
+            el.appendChild(resizeHandle);
+
+            const rotateHandle = document.createElement("div");
+            rotateHandle.className = "rotate-handle";
+            el.appendChild(rotateHandle);
+
+            resizeHandle.onmousedown = (e) => {
+                e.stopPropagation();
+                isResizing = true;
+                startX = e.clientX;
+                startWidth = el.offsetWidth;
+                document.onmousemove = resize;
+                document.onmouseup = stop;
+            };
+
+            rotateHandle.onmousedown = (e) => {
+                e.stopPropagation();
+                isRotating = true;
+                
+                const rect = el.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI;
+                
+                const transform = el.style.transform;
+                const match = transform.match(/rotate\(([-\d.]+)deg\)/);
+                currentAngle = match ? parseFloat(match[1]) : 0;
+                
+                document.onmousemove = rotate;
+                document.onmouseup = stop;
+            };
+        }
+
+        // ========== ROTAR ==========
+        function rotate(e) {
+            if (!isRotating || !selected) return;
+            
+            const rect = selected.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            let newAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI;
+            let angleDiff = newAngle - startAngle;
+            let finalAngle = currentAngle + angleDiff;
+            
+            selected.style.transform = `rotate(${finalAngle}deg)`;
+        }
+
+        // ========== REDIMENSIONAR ==========
+        function resize(e) {
+            if (!isResizing || !selected) return;
+            let newWidth = Math.max(80, startWidth + (e.clientX - startX));
+            selected.style.width = newWidth + "px";
+        }
+
+        // ========== ARRASTRAR ==========
+        function startDrag(e, el) {
+            if (e.target.classList.contains("resize-handle")) return;
+            if (e.target.classList.contains("rotate-handle")) return;
+            
+            dragStarted = false;
+            isDragging = true;
+            selected = el;
+            startX = e.clientX;
+            startY = e.clientY;
+            startLeft = parseFloat(el.style.left || 0);
+            startTop = parseFloat(el.style.top || 0);
+            
+            document.onmousemove = drag;
+            document.onmouseup = stopDrag;
+        }
+
+        function drag(e) {
+            if (!isDragging || !selected) return;
+            
+            if (!dragStarted && (Math.abs(e.clientX - startX) > 3 || Math.abs(e.clientY - startY) > 3)) {
+                dragStarted = true;
+            }
+            
+            selected.style.left = (startLeft + (e.clientX - startX)) + "px";
+            selected.style.top = (startTop + (e.clientY - startY)) + "px";
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            document.onmousemove = null;
+            document.onmouseup = null;
+            
+            if (dragStarted) {
+                savePositions();
+            }
+            dragStarted = false;
+        }
+
+        // ========== ROTAR CON TECLADO ==========
+        document.addEventListener('keydown', (e) => {
+            if (!selected) return;
+            if (e.key === "q" || e.key === "Q") rotateKeyboard(-5);
+            if (e.key === "e" || e.key === "E") rotateKeyboard(5);
+        });
+
+        function rotateKeyboard(d) {
+            let transform = selected.style.transform || "rotate(0deg)";
+            let match = transform.match(/rotate\(([-\d.]+)deg\)/);
+            let currentRot = match ? parseFloat(match[1]) : 0;
+            let newRot = currentRot + d;
+            selected.style.transform = `rotate(${newRot}deg)`;
+            savePositions();
+        }
+
+        // ========== DETENER ==========
+        function stop() {
+            isDragging = false;
+            isResizing = false;
+            isRotating = false;
+            document.onmousemove = null;
+            document.onmouseup = null;
+            savePositions();
+        }
+
+        // ========== SELECCIONAR ELEMENTO ==========
+        function selectElement(el) {
+            if (selected && selected !== el) {
+                selected.classList.remove('selected');
+                selected.style.outline = "none";
+            }
+            
+            selected = el;
+            selected.classList.add('selected');
+            createHandles(selected);
+        }
+
+        // ========== ASIGNAR EVENTOS ==========
+        function asignarEventos() {
+            document.querySelectorAll('.boton-movible').forEach(el => {
+                let clickTimeout = null;
+                let hasDoubleClicked = false;
+                
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (hasDoubleClicked) { hasDoubleClicked = false; return; }
+                    if (clickTimeout) { clearTimeout(clickTimeout); clickTimeout = null; }
+                    clickTimeout = setTimeout(() => { selectElement(el); clickTimeout = null; }, 150);
+                });
+                
+                el.addEventListener('dblclick', (e) => {
+                    e.stopPropagation();
+                    hasDoubleClicked = true;
+                    if (clickTimeout) { clearTimeout(clickTimeout); clickTimeout = null; }
+                });
+                
+                el.addEventListener('mousedown', (e) => {
+                    startDrag(e, el);
+                });
+            });
+        }
+
+        // ========== FUNCIONES DE NAVEGACIÓN ==========
+        const btnInicio = document.getElementById('btnInicio');
+        const btnRegreso = document.getElementById('btnRegreso');
+        const btnSiguiente = document.getElementById('btnSiguiente');
+
+        function setupButtonAction(btn, action) {
+            if (!btn) return;
+            
+            let hasMoved = false;
+            let startX = 0, startY = 0;
+            
+            btn.addEventListener('mousedown', (e) => {
+                hasMoved = false;
+                startX = e.clientX;
+                startY = e.clientY;
+            });
+            
+            btn.addEventListener('mousemove', (e) => {
+                if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
+                    hasMoved = true;
+                }
+            });
+            
+            btn.addEventListener('click', (e) => {
+                if (hasMoved) {
+                    e.preventDefault();
+                    return;
+                }
+                action(e);
+            });
+        }
+
+        if (btnRegreso) {
+            setupButtonAction(btnRegreso, () => {
+                window.location.href = 'logos.html';
+            });
+        }
+        
+        // ✅ BOTÓN SIGUIENTE ENLAZADO A portafolio.html
+        if (btnSiguiente) {
+            setupButtonAction(btnSiguiente, () => {
+                window.location.href = 'portafolio.html';
+            });
+        }
+        
+        if (btnInicio) {
+            setupButtonAction(btnInicio, (e) => {
+                window.location.href = btnInicio.href;
+            });
+        }
+
+        // ========== VERIFICAR IMÁGENES ==========
+        function verificarImagenes() {
+            const imagenes = document.querySelectorAll('.carrusel-item-vertical img');
+            imagenes.forEach(img => {
+                img.addEventListener('error', () => {
+                    console.warn(`⚠️ Imagen no encontrada: ${img.src}`);
+                });
+                img.addEventListener('load', () => {
+                    console.log(`✅ Imagen cargada: ${img.src.split('/').pop()}`);
+                });
+            });
+        }
+
+        // ========== CLICK FUERA ==========
+        document.body.addEventListener('click', (e) => {
+            if (!e.target.closest('.boton-movible')) {
+                if (selected) {
+                    selected.classList.remove('selected');
+                    selected.style.outline = "none";
+                    selected = null;
+                }
+            }
+        });
+
+        // ========== INICIALIZAR ==========
+        loadPositions();
+        asignarEventos();
+        verificarImagenes();
+        
+        console.log("%c🎨 Modelados 3D - Carrusel Vertical GRANDE", "color: #FFD700; font-size: 14px; font-weight: bold");
+        console.log("✅ Carrusel VERTICAL MÁS GRANDE: 450px × 550px");
+        console.log("✅ Video (400px) debajo de los botones");
+        console.log("✅ Botón SIGUIENTE enlazado a portafolio.html");
+        console.log("✅ Botones MOVIBLES (arrastra, rota, redimensiona)");
+        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    </script>
+</body>
+</html>
